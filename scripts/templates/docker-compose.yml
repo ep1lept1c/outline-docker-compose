@@ -12,7 +12,7 @@ services:
       POSTGRES_PASSWORD: pass
       POSTGRES_DB: outline
     volumes:
-      - ./data/pgdata:/var/lib/postgresql/data
+      - /data/outline_data/pgdata:/var/lib/postgresql/data
     restart: always
     networks:
       - ${NETWORKS}
@@ -20,8 +20,8 @@ services:
   wk-minio:
     image: minio/minio:${MINIO_VERSION}
     volumes:
-      - ./data/minio_root:/minio_root:z
-      - ./data/certs:/root/.minio/certs:z
+      - /data/outline_data/minio_root:/minio_root:z
+      - /data/outline_data/certs:/root/.minio/certs:z
     command: "minio server /minio_root"
     env_file:
       - ./env.minio
@@ -56,7 +56,8 @@ services:
       - ./env.outline
       - ./env.oidc
     volumes:
-      - ./data/outline:/var/lib/outline/data
+      - /data/outline_data/outline:/var/lib/outline/data
+    user: 0:0
     restart: always
     depends_on:
       - wk-postgres
@@ -70,8 +71,8 @@ services:
     image: vicalloy/oidc-server
     volumes:
       - ./config/uc/fixtures:/app/oidc_server/fixtures:z
-      - ./data/uc/db:/app/db:z
-      - ./data/uc/static_root:/app/static_root:z
+      - /data/outline_data/uc/db:/app/db:z
+      - /data/outline_data/uc/static_root:/app/static_root:z
     restart: always
     env_file:
       - ./env.oidc-server
@@ -83,7 +84,7 @@ services:
       - ${HTTP_IP}:${HTTP_PORT_IP}:80
     volumes:
       - ./config/nginx/:/etc/nginx/conf.d/:ro
-      - ./data/uc/static_root:/uc/static_root:ro
+      - /data/outline_data/uc/static_root:/uc/static_root:ro
     restart: always
     depends_on:
 ##BEGIN MINIO 
